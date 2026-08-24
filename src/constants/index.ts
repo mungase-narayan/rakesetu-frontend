@@ -7,3 +7,5 @@ export {
   AVAILABLE_USER_ROLES,
   USER_ROLE_LABELS,
 } from './user.constants';
+export { NAVIGATION, ROLE_TREE_ORDER } from './navigation';
+export type { NavItem, NavSection } from './navigation';

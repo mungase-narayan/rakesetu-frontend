@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router';
 
+import { ROUTES } from '@/routes/route-paths';
+
 import Navbar from './components/navbar';
 import Hero from './components/hero';
 import ProblemSection from './components/problem-section';
@@ -17,7 +19,7 @@ import SiteFooter from './components/site-footer';
  */
 const HomePage = () => {
   const navigate = useNavigate();
-  const goLogin = () => navigate('/auth/login');
+  const goLogin = () => navigate(ROUTES.auth.login);
 
   return (
     <div className="min-h-dvh overflow-x-hidden bg-background text-foreground">

@@ -5,6 +5,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { AppRoutes } from '@/routes';
 import store, { persistor } from '@/store';
 import { ThemeProvider } from '@/providers';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 /**
@@ -33,7 +34,13 @@ const App = () => {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
-            <AppRoutes />
+            {/* Radix Tooltip throws — not warns — outside a provider, which
+                takes the whole page down with it. The collapsed sidebar and the
+                audit viewer's correlation ids both use tooltips, so this sits
+                at the root rather than being remembered per screen. */}
+            <TooltipProvider delayDuration={200}>
+              <AppRoutes />
+            </TooltipProvider>
           </QueryClientProvider>
         </PersistGate>
       </Provider>

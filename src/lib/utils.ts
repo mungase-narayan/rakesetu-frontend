@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { ROUTES } from '@/routes/route-paths';
 import type { LoginRole, UserRoleType } from '@/types/user.types';
 
 export function cn(...inputs: ClassValue[]) {
@@ -8,31 +9,45 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Landing path for each role after login.
+ * Landing path for each role after login — one workspace per persona.
  *
- * Every role currently resolves to the single placeholder dashboard. The
- * per-role workspaces this map is designed for land in a later pass:
- *   freight_customer    → /customer/dashboard
- *   freight_controller  → /controller/dashboard
- *   terminal_supervisor → /terminal/dashboard
- *   commercial_officer  → /commercial/dashboard
- *   zonal_manager       → /zonal/dashboard
- *   admin               → /admin/dashboard
- * When one of those areas exists, change its entry here — nothing else in the
- * login flow needs to move.
+ * Later phases add screens *inside* an owning tree and never a seventh
+ * top-level branch, so this map is expected to stay six entries long for the
+ * rest of the build.
  */
-const ROLE_HOME: Record<UserRoleType, string> = {
-  admin: '/app/dashboard',
-  zonal_manager: '/app/dashboard',
-  freight_controller: '/app/dashboard',
-  terminal_supervisor: '/app/dashboard',
-  commercial_officer: '/app/dashboard',
-  freight_customer: '/app/dashboard',
+export const ROLE_HOME: Record<UserRoleType, string> = {
+  admin: ROUTES.admin.dashboard,
+  zonal_manager: ROUTES.zonal.dashboard,
+  freight_controller: ROUTES.controller.dashboard,
+  terminal_supervisor: ROUTES.terminal.dashboard,
+  commercial_officer: ROUTES.commercial.dashboard,
+  freight_customer: ROUTES.customer.dashboard,
 };
 
-/** Resolve the home path for an authenticated user from their roles. */
-export function handleNavigate(roles: LoginRole[]): string {
-  return roles.length ? (ROLE_HOME[roles[0].name] ?? '/app/dashboard') : '/';
+/**
+ * Where an authenticated user belongs.
+ *
+ * `activeRole` wins over `roles[0]` when it is set and still held. A user with
+ * two grants has chosen which workspace they are working in; sending them to
+ * whichever role the join happened to return first would undo that choice on
+ * every navigation, and the choice is the entire point of the role switcher.
+ */
+export function handleNavigate(
+  roles: LoginRole[],
+  activeRole?: UserRoleType | null
+): string {
+  // No roles is a real state — an account can be created and activated before
+  // anyone grants it one. It resolves to `/app`, which explains the situation,
+  // rather than to the public landing page, which would make a successful
+  // sign-in look like a failed one.
+  if (!roles.length) return ROUTES.app;
+
+  const active =
+    activeRole && roles.some((role) => role.name === activeRole)
+      ? activeRole
+      : roles[0].name;
+
+  return ROLE_HOME[active] ?? ROUTES.app;
 }
 
 /** ISO date (YYYY-MM-DD, optionally with time) → dd/mm/yyyy. */
