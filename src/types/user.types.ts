@@ -1,8 +1,10 @@
 import type { AVAILABLE_USER_ROLES, USER_STATUSES } from '@/constants';
 
 import type { Organization } from './organization.types';
+import type { Permission } from './permission.types';
 
 export type { Organization, OrganizationType } from './organization.types';
+export type { Permission } from './permission.types';
 
 export type UserStatus = (typeof USER_STATUSES)[number];
 export type UserRoleType = (typeof AVAILABLE_USER_ROLES)[number];
@@ -39,11 +41,18 @@ export interface Tokens {
   accessToken: string;
 }
 
-/** Mirrors the backend's LoginResponseDto. */
+/**
+ * Mirrors the backend's LoginResponseDto.
+ *
+ * `permissions` is the resolved union for this user, computed server-side from
+ * the same `ROLE_PERMISSIONS` map that `requirePermission` enforces. The client
+ * is told the answer rather than recomputing it, so there is exactly one map.
+ */
 export interface LoginResponse {
   user: User;
   organization: Organization | null;
   roles: LoginRole[];
+  permissions: Permission[];
   tokens: Tokens;
 }
 
@@ -52,6 +61,7 @@ export interface MeResponse {
   user: User;
   organization: Organization | null;
   roles: LoginRole[];
+  permissions: Permission[];
 }
 
 export interface LoginBody {

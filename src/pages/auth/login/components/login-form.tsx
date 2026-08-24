@@ -31,10 +31,14 @@ const LoginForm = () => {
         onSuccess: ({ data }) => {
           const loginData: LoginResponse = data.data;
           dispatch(setAuth(loginData));
-          // Every seeded account holds exactly one role, so the first role
-          // decides the landing path. A role-selector dialog for multi-role
-          // users slots in here later.
-          navigate(handleNavigate(loginData.roles), { replace: true });
+          // `setAuth` has just defaulted `activeRole` to roles[0], so a
+          // multi-role account lands in its first workspace and switches from
+          // the header rather than being asked to choose before it has seen
+          // anything.
+          navigate(
+            handleNavigate(loginData.roles, loginData.roles[0]?.name ?? null),
+            { replace: true }
+          );
         },
         // Failures are surfaced by the axios response interceptor as a toast
         // carrying the backend's own message.

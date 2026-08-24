@@ -8,13 +8,17 @@ import axios, {
 import store, { logout, setAccessToken } from '@/store';
 import { errorToast } from '@/lib/toast.lib';
 import { appEnv, ERROR_MESSAGE } from '@/constants';
+import { ROUTES } from '@/routes/route-paths';
 import type { APIRequestMethodType } from '@/types/api-request.types';
 import type { ApiResponse } from '@/types/shared.types';
 import type { RefreshResponse } from '@/types/user.types';
 
 export const performLogout = (): void => {
   store.dispatch(logout());
-  window.location.href = '/auth/login';
+  // A full document load, not a router navigate: this runs from an axios
+  // interceptor that has no router context, and a hard reload is also the
+  // surest way to drop any component state built on the dead session.
+  window.location.href = ROUTES.auth.login;
 };
 
 export const axiosInstance = axios.create({

@@ -7,6 +7,8 @@ import {
   ViewOffIcon,
 } from '@hugeicons/core-free-icons';
 
+import { Link } from 'react-router';
+
 import {
   FormControl,
   FormField,
@@ -15,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ROUTES } from '@/routes/route-paths';
 import type { LoginFormValues } from '../schema';
 
 interface Props {
@@ -31,7 +34,18 @@ const PasswordField = ({ disabled }: Props) => {
       name="password"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Password</FormLabel>
+          <div className="flex items-center justify-between gap-2">
+            <FormLabel>Password</FormLabel>
+            {/* Next to the field it applies to, not buried under the button —
+                somebody who cannot remember their password looks here first. */}
+            <Link
+              to={ROUTES.auth.forgotPassword}
+              className="text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+              tabIndex={-1}
+            >
+              Forgot password?
+            </Link>
+          </div>
           <FormControl>
             <div className="relative">
               <HugeiconsIcon

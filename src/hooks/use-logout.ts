@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { logout } from '@/store';
+import { ROUTES } from '@/routes/route-paths';
 import { apis } from '@/api/auth/apis';
 import { successToast } from '@/lib/toast.lib';
 
@@ -20,7 +21,7 @@ const useLogout = () => {
     apis.logout().catch(() => undefined);
     dispatch(logout());
     queryClient.clear();
-    navigate('/auth/login', { replace: true });
+    navigate(ROUTES.auth.login, { replace: true });
     successToast({ message: 'You have been signed out.' });
   };
 };
