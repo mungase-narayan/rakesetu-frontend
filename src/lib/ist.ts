@@ -53,3 +53,29 @@ export const formatIst = (
 
   return variant === 'date' ? normalized : `${normalized} IST`;
 };
+
+const IST_OFFSET_MINUTES = 330;
+
+/**
+ * A UTC instant as the `YYYY-MM-DDTHH:mm` an `<input type="datetime-local">`
+ * wants — **in IST**, whatever zone the device is in.
+ *
+ * The browser's native control has no time zone: it shows and returns a wall
+ * clock, and which wall clock that is depends entirely on the machine. A tablet
+ * at a siding is almost certainly on IST, and a laptop in a different zone is
+ * the case that produces a placement stamped five and a half hours out — which
+ * is not a display bug, it is a demurrage clock that started at the wrong time.
+ * So the conversion is explicit in both directions and the field is labelled.
+ */
+export const toIstInputValue = (value: Date | string): string => {
+  const date = value instanceof Date ? value : new Date(value);
+  return new Date(date.getTime() + IST_OFFSET_MINUTES * 60_000)
+    .toISOString()
+    .slice(0, 16);
+};
+
+/** The inverse: a wall clock the supervisor typed, read as IST, back to UTC. */
+export const fromIstInputValue = (value: string): Date =>
+  new Date(
+    new Date(`${value}:00.000Z`).getTime() - IST_OFFSET_MINUTES * 60_000
+  );
