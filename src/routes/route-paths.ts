@@ -43,11 +43,21 @@ export const ROUTES = {
   controller: {
     root: `${APP}/controller`,
     dashboard: `${APP}/controller/dashboard`,
+    embargoes: `${APP}/controller/embargoes`,
+    network: `${APP}/controller/network`,
+    rakes: `${APP}/controller/rakes`,
+    /** The event log for one rake. `rakesPattern` is what the route declares. */
+    rakesPattern: `${APP}/controller/rakes/:rakeId`,
+    rake: (rakeId: string) => `${APP}/controller/rakes/${rakeId}`,
   },
 
   terminal: {
     root: `${APP}/terminal`,
     dashboard: `${APP}/terminal/dashboard`,
+    /** Phase 5 — the supervisor's three working screens. */
+    placements: `${APP}/terminal/placements`,
+    log: `${APP}/terminal/log`,
+    exceptions: `${APP}/terminal/exceptions`,
   },
 
   commercial: {
@@ -58,6 +68,7 @@ export const ROUTES = {
   zonal: {
     root: `${APP}/zonal`,
     dashboard: `${APP}/zonal/dashboard`,
+    network: `${APP}/zonal/network`,
   },
 
   admin: {
@@ -65,6 +76,12 @@ export const ROUTES = {
     dashboard: `${APP}/admin/dashboard`,
     users: `${APP}/admin/users`,
     audit: `${APP}/admin/audit`,
+    masterData: `${APP}/admin/master-data`,
+    customers: `${APP}/admin/customers`,
+    chargeRules: `${APP}/admin/charge-rules`,
+    documents: `${APP}/admin/documents`,
+    /** Phase 5 — the inside of the ETA engine, for debugging an estimate. */
+    etaWeights: `${APP}/admin/eta-weights`,
   },
 } as const;
 

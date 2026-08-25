@@ -1,5 +1,6 @@
 import type { IconSvgElement } from '@hugeicons/react';
 import {
+  Alert02Icon,
   Analytics01Icon,
   CalendarCheckIn01Icon,
   ChartLineData01Icon,
@@ -94,7 +95,15 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
           to: ROUTES.customer.dashboard,
           icon: MapsIcon,
           permission: 'rake:read',
-          pendingPhase: 5,
+          /*
+            Still pending after Phase 5, and deliberately. The live map exists
+            and is now SSE-driven — but `/network/live` and `/network/stream`
+            both carry a role guard that excludes a customer, because the
+            division's whole freight position is a competitor's information.
+            Phase 6 gives this persona a map scoped to *their own* consignments,
+            which is a different endpoint rather than a different link.
+          */
+          pendingPhase: 6,
         },
         {
           label: 'Charges',
@@ -139,32 +148,29 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
       items: [
         {
           label: 'Rakes',
-          to: ROUTES.controller.dashboard,
+          to: ROUTES.controller.rakes,
           icon: TruckDeliveryIcon,
           permission: 'rake:read',
-          pendingPhase: 4,
         },
         {
-          label: 'Live map',
-          to: ROUTES.controller.dashboard,
+          // Phase 5 upgrades the transport to SSE and adds ETA and congestion
+          // colour; the route does not move, so this entry does not change again.
+          label: 'Network map',
+          to: ROUTES.controller.network,
           icon: MapsIcon,
           permission: 'rake:read',
-          pendingPhase: 5,
         },
         {
           label: 'Embargoes',
-          to: ROUTES.controller.dashboard,
+          to: ROUTES.controller.embargoes,
           icon: SecurityCheckIcon,
           permission: 'embargo:write',
-          pendingPhase: 5,
         },
-        {
-          label: 'Master data',
-          to: ROUTES.controller.dashboard,
-          icon: DatabaseIcon,
-          permission: 'masterdata:read',
-          pendingPhase: 3,
-        },
+        // No master-data link here, for the same reason there is no audit link
+        // in the zonal tree. A controller holds `masterdata:read`, so the item
+        // would render — but the screen lives under `RoleLayout role="admin"`,
+        // so following it lands on a 403 every time. §7 gives this persona the
+        // embargo screen; a link that always fails is worse than no link.
       ],
     },
   ],
@@ -174,18 +180,22 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
       items: [
         dashboard(ROUTES.terminal.dashboard),
         {
+          /*
+            Phase 5. "Placements" and "Rakes on hand" were two pending entries
+            pointing at the same unbuilt screen; the board answers both, so the
+            second is not resurrected as a duplicate link — it is a section of
+            this page.
+          */
           label: 'Placements',
-          to: ROUTES.terminal.dashboard,
+          to: ROUTES.terminal.placements,
           icon: CalendarCheckIn01Icon,
-          permission: 'terminal:log',
-          pendingPhase: 5,
+          permission: 'terminal:read',
         },
         {
-          label: 'Rakes on hand',
-          to: ROUTES.terminal.dashboard,
-          icon: TruckDeliveryIcon,
-          permission: 'rake:read',
-          pendingPhase: 4,
+          label: 'Log an event',
+          to: ROUTES.terminal.log,
+          icon: Timer02Icon,
+          permission: 'terminal:log',
         },
       ],
     },
@@ -193,11 +203,25 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
       title: 'Terminal',
       items: [
         {
-          label: 'Event log',
-          to: ROUTES.terminal.dashboard,
-          icon: Timer02Icon,
+          label: 'Exceptions',
+          to: ROUTES.terminal.exceptions,
+          icon: Alert02Icon,
           permission: 'rake:event:create',
-          pendingPhase: 4,
+        },
+        {
+          label: 'Network map',
+          to: ROUTES.controller.network,
+          icon: MapsIcon,
+          permission: 'rake:read',
+          /*
+            The map lives in the controller tree and `RoleLayout` guards it by
+            role — a supervisor entering `/app/controller/network` would land on
+            a 403. Kept pending rather than linked, for the same reason the
+            controller has no master-data link: a link that always fails is
+            worse than no link. Phase 8 gives this persona its own congestion
+            view, which is the screen they actually want.
+          */
+          pendingPhase: 8,
         },
         {
           label: 'Congestion',
@@ -282,6 +306,12 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
       title: 'Insight',
       items: [
         {
+          label: 'Network map',
+          to: ROUTES.zonal.network,
+          icon: MapsIcon,
+          permission: 'rake:read',
+        },
+        {
           label: 'Empty-km savings',
           to: ROUTES.zonal.dashboard,
           icon: ChartLineData01Icon,
@@ -320,10 +350,36 @@ export const NAVIGATION: Record<UserRoleType, NavSection[]> = {
       items: [
         {
           label: 'Master data',
-          to: ROUTES.admin.dashboard,
+          to: ROUTES.admin.masterData,
           icon: DatabaseIcon,
           permission: 'masterdata:write',
-          pendingPhase: 3,
+        },
+        {
+          label: 'Customers',
+          to: ROUTES.admin.customers,
+          icon: UserGroupIcon,
+          permission: 'masterdata:read',
+        },
+        {
+          label: 'Charge rules',
+          to: ROUTES.admin.chargeRules,
+          icon: Coins01Icon,
+          permission: 'masterdata:read',
+        },
+        {
+          label: 'Documents',
+          to: ROUTES.admin.documents,
+          icon: File01Icon,
+          permission: 'masterdata:read',
+        },
+        {
+          // Phase 5. The audience is an administrator asking why an ETA looks
+          // wrong; the operating roles see the answer and its provenance on the
+          // rake sheet instead, which is why the guard is `analytics:read`.
+          label: 'ETA weights',
+          to: ROUTES.admin.etaWeights,
+          icon: Route01Icon,
+          permission: 'analytics:read',
         },
         {
           label: 'AI jobs',

@@ -3,11 +3,14 @@ import {
   DatabaseIcon,
   SecurityCheckIcon,
   Settings02Icon,
+  TruckDeliveryIcon,
   UserGroupIcon,
 } from '@hugeicons/core-free-icons';
 
 import { useUserList } from '@/api/user-admin';
 import { useAuditList } from '@/api/audit';
+import { useStationList } from '@/api/network';
+import { useRakeList } from '@/api/asset';
 import { ROUTES } from '@/routes/route-paths';
 import { Button } from '@/components/ui/button';
 
@@ -41,6 +44,20 @@ const AdminDashboard = () => {
     from: istTodayStart(),
   });
 
+  // Two one-row pages, read for their totals. The tile answers "is there a
+  // network to run trains over", which is the question a fresh database gets
+  // wrong — and a zero here is a real, actionable zero rather than a plausible
+  // placeholder.
+  const { pagination: stations, isLoading: stationsLoading } = useStationList({
+    page: 1,
+    limit: 1,
+  });
+
+  const { pagination: rakes, isLoading: rakesLoading } = useRakeList({
+    page: 1,
+    limit: 1,
+  });
+
   return (
     <DashboardShell
       role="admin"
@@ -61,7 +78,20 @@ const AdminDashboard = () => {
           isLoading: auditLoading,
           hint: 'Since midnight IST',
         },
-        { label: 'Master-data health', icon: DatabaseIcon, pendingPhase: 3 },
+        {
+          label: 'Stations on the network',
+          icon: DatabaseIcon,
+          value: stations?.total ?? null,
+          isLoading: stationsLoading,
+          hint: 'Global reference data, shared by every tenant',
+        },
+        {
+          label: 'Rakes in the register',
+          icon: TruckDeliveryIcon,
+          value: rakes?.total ?? null,
+          isLoading: rakesLoading,
+          hint: 'Owned by this organization',
+        },
         { label: 'Failed AI jobs', icon: Settings02Icon, pendingPhase: 11 },
       ]}
     >
@@ -72,16 +102,16 @@ const AdminDashboard = () => {
         <Button asChild size="sm" variant="outline">
           <Link to={ROUTES.admin.audit}>Open the audit log</Link>
         </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link to={ROUTES.admin.masterData}>Browse master data</Link>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link to={ROUTES.admin.chargeRules}>Charge rules</Link>
+        </Button>
       </div>
 
       <PendingPanel
         items={[
-          {
-            icon: DatabaseIcon,
-            title: 'Master data',
-            body: 'Stations, sections, wagon types, commodities and the charge rules — thirteen tables the rest of the product reads.',
-            phase: 3,
-          },
           {
             icon: Settings02Icon,
             title: 'AI job monitor',
